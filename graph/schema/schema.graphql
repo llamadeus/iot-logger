@@ -1,0 +1,36 @@
+"ISO8601 conform time scalar."
+scalar Time
+
+type Message {
+    "The id of the message."
+    id: ID!
+
+    "The message content."
+    text: String!
+
+    "Timestamp when the message was recorded."
+    timestamp: Time!
+}
+
+type Query {
+    """
+    Pings the server.
+    Needed because type Query must not be empty.
+    """
+    ping: String!
+}
+
+type Mutation {
+    """
+    Add a new message to the given channel.
+    Returns true if at least one listener captured the message.
+    """
+    addMessage(channel: String!, message: String!): Boolean!
+}
+
+type Subscription {
+    """
+    Subscribes to all messages within a channel.
+    """
+    messageAdded(channel: String!): Message!
+}
