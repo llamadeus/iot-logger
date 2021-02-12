@@ -27,7 +27,7 @@ func main() {
 	app := server.Init(server.Options{
 		Port:          viper.GetString("APP_PORT"),
 		Schema:        generated.NewExecutableSchema(graph.New()),
-		AntiCSRF:      !isDevelopment(),
+		AntiCSRF:      false,
 		Playground:    isDevelopment(),
 		Introspection: isDevelopment(),
 	})
