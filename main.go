@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/llamadeus/iot-logger/features/channels"
 	"github.com/llamadeus/iot-logger/graph"
 	"github.com/llamadeus/iot-logger/graph/generated"
 	"github.com/llamadeus/iot-logger/internal/server"
@@ -31,6 +32,9 @@ func main() {
 		Playground:    isDevelopment(),
 		Introspection: isDevelopment(),
 	})
+
+	app.Echo.POST("/api/messages/:channel", channels.HandleAddMessage)
+
 	err := app.Start()
 
 	if err != nil {
