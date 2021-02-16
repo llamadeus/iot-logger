@@ -36,9 +36,9 @@ func init() {
 	go func() {
 		for {
 			select {
-			case <- ticker.C:
+			case <-ticker.C:
 				cleanChannels()
-			case <- quit:
+			case <-quit:
 				ticker.Stop()
 				return
 			}
