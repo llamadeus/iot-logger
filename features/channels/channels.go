@@ -5,6 +5,7 @@ package channels
 import (
 	"context"
 	"github.com/llamadeus/iot-logger/graph/types"
+	"github.com/llamadeus/iot-logger/internal/tailbuf"
 	"github.com/llamadeus/iot-logger/internal/utils"
 	"sync"
 	"time"
@@ -14,6 +15,7 @@ import (
 type Channel struct {
 	*sync.Mutex
 	Name      string
+	History   *tailbuf.TailBuf
 	LastUsed  time.Time
 	Listeners map[string]*Listener
 }
@@ -23,6 +25,8 @@ type Listener struct {
 	Id      string
 	Channel chan *types.Message
 }
+
+const historyLength = 100
 
 var (
 	mutex    sync.Mutex
@@ -46,18 +50,29 @@ func init() {
 	}()
 }
 
+// Get the message history for the given channel.
+func History(ctx context.Context, channelName string) ([]*types.Message, error) {
+	channel := getChannel(channelName)
+	messages := messagesFromHistory(channel.History)
+
+	return messages, nil
+}
+
 // Add a message to the given channel.
 func AddMessage(ctx context.Context, channelName string, message string) (bool, error) {
 	channel := getChannel(channelName)
-	received := false
+	msg := types.Message{
+		ID:        utils.NewID(),
+		Text:      message,
+		Timestamp: time.Now(),
+	}
 
+	channel.History.Write(&msg)
+
+	received := false
 	for _, listener := range channel.Listeners {
 		select {
-		case listener.Channel <- &types.Message{
-			ID:        utils.NewID(),
-			Text:      message,
-			Timestamp: time.Now(),
-		}:
+		case listener.Channel <- &msg:
 			received = true
 		}
 	}
@@ -88,6 +103,7 @@ func getChannel(channelName string) *Channel {
 		channels[channelName] = &Channel{
 			Mutex:     new(sync.Mutex),
 			Name:      channelName,
+			History:   tailbuf.New(historyLength),
 			LastUsed:  time.Now(),
 			Listeners: make(map[string]*Listener),
 		}
@@ -145,4 +161,16 @@ func leaveChannel(channel *Channel, listener *Listener) {
 	defer channel.Unlock()
 
 	delete(channel.Listeners, listener.Id)
+}
+
+// Transform messages within the history buffer to a messages array.
+func messagesFromHistory(history *tailbuf.TailBuf) []*types.Message {
+	data := history.Read()
+	result := make([]*types.Message, len(data))
+
+	for i, value := range data {
+		result[i] = value.(*types.Message)
+	}
+
+	return result
 }

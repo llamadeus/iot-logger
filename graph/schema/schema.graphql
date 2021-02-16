@@ -18,6 +18,11 @@ type Query {
     Needed because type Query must not be empty.
     """
     ping: String!
+
+    """
+    Get the message history for the given channel.
+    """
+    history(channel: String!): [Message!]!
 }
 
 type Mutation {

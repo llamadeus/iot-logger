@@ -15,6 +15,10 @@ func (r *queryResolver) Ping(ctx context.Context) (string, error) {
 	return "pong", nil
 }
 
+func (r *queryResolver) History(ctx context.Context, channel string) ([]*types.Message, error) {
+	return channels.History(ctx, channel)
+}
+
 func (r *mutationResolver) AddMessage(ctx context.Context, channel string, message string) (bool, error) {
 	return channels.AddMessage(ctx, channel, message)
 }
