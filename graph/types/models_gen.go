@@ -7,7 +7,10 @@ import (
 )
 
 type Message struct {
-	ID        string    `json:"id"`
-	Text      string    `json:"text"`
+	// The id of the message.
+	ID string `json:"id"`
+	// The message content.
+	Text string `json:"text"`
+	// Timestamp when the message was recorded.
 	Timestamp time.Time `json:"timestamp"`
 }
