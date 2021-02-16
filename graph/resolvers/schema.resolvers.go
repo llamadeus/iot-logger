@@ -11,12 +11,12 @@ import (
 	"github.com/llamadeus/iot-logger/graph/types"
 )
 
-func (r *mutationResolver) AddMessage(ctx context.Context, channel string, message string) (bool, error) {
-	return channels.AddMessage(ctx, channel, message)
-}
-
 func (r *queryResolver) Ping(ctx context.Context) (string, error) {
 	return "pong", nil
+}
+
+func (r *mutationResolver) AddMessage(ctx context.Context, channel string, message string) (bool, error) {
+	return channels.AddMessage(ctx, channel, message)
 }
 
 func (r *subscriptionResolver) MessageAdded(ctx context.Context, channel string) (<-chan *types.Message, error) {
